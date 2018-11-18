@@ -1,0 +1,59 @@
+#sb1 {
+  max-width: 600px;
+}
+
+#main {
+  float: left;
+  width: 750px;
+}
+
+#sidebar {
+  float: right;
+  min-width: 100px;
+  max-width: 150px;
+}
+
+#sidebar > .map {
+  position: absolute;
+}
+
+#sequence {
+  flex-grow: 1;
+  height: 70px;
+}
+
+#legend {
+  padding: 10px 0 0 3px;
+}
+
+#sequence text,
+#legend text {
+  font-weight: 600;
+  fill: #fff;
+}
+
+#chart {
+  position: relative;
+}
+
+#chart path {
+  stroke: #fff;
+}
+
+#explanation {
+  position: absolute;
+  top: 260px;
+  left: 305px;
+  width: 140px;
+  text-align: center;
+  color: #666;
+  z-index: -1;
+}
+
+#percentage {
+  font-size: 2.5em;
+}
+
+.opacity_30 {
+  opacity: 0.3;
+}

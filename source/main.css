@@ -1,0 +1,106 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  background-color: #222;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  margin-top: 2px;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  min-width: 200px;
+  min-height: 500px;
+}
+
+.column {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.item {
+  margin: 5px;
+  flex-grow: 1;
+  min-height: 250px;
+  min-width: 250px;
+  background-color: #fff;
+}
+
+.small.item {
+  min-width: 305px;
+}
+
+#br {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  min-height: 250px;
+}
+
+#br > section {
+  flex-grow: 1;
+}
+
+#chart1 {
+  background-color: #fff;
+  min-width: 710px;
+  padding: 5px;
+  flex: 1;
+}
+
+#chart2 {
+  background-color: #fff;
+  min-width: 610px;
+  padding: 5px;
+  flex: 1;
+}
+
+.align_centre {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex_grow {
+  flex: 1;
+}
+
+.flex_nogrow {
+  flex: 0;
+}
+
+.flex_nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex_wrap {
+  flex-wrap: wrap;
+}
+
+.flex_row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex_column {
+  display: flex;
+  flex-direction: column;
+}
+
+.float_right {
+  float: right;
+}

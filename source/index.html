@@ -1,0 +1,326 @@
+<!--------------------------------------------------------------------
+
+   Module: main html file for Data visualization coursework
+
+   Author: Antonio Gargaro
+
+   What it does:
+  	Constructs all module parts of coursework in here
+
+---------------------------------------------------------------------->
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Data visualization Dashboard - Coursework</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <!-- import views css -->
+  <link rel="stylesheet" type="text/css" href="./assets/css/views/sequences_sunburst/sequences.css" />
+  <link rel="stylesheet" type="text/css" href="./assets/css/views/uk_map/map-v001.css" />
+  <link rel="stylesheet" type="text/css" href="./assets/css/views/scatterplot/scatterplot.css" />
+  <link rel="stylesheet" type="text/css" href="./assets/css/views/linkedNodes/linkedNodes.css" />
+  <link rel="stylesheet" type="text/css" href="./assets/css/fonts/OpenSans.css">
+
+  <!-- import javascript lib dependency files -->
+  <script type="text/javascript" src="./assets/js/d3/d3.v4.js"></script>
+  <script type="text/javascript" src="./assets/js/lib/model/ref14model_v003.js"></script>
+</head>
+
+<body>
+  <!--
+  Contains the sunburst graph. This is licenced under
+  apache 2.0, link available in report.
+  -->
+  <div class='dashboard'>
+
+    <div class='column'>
+      <div id="chart1" class="item">
+        <div class="flex_row flex_nowrap">
+          <div class="flex_column flex_grow">
+            <div id="sequence"></div>
+            <div class="flex_row align_centre">
+              <div id="explanation" style="visibility: hidden;">
+                <span id="percentage"></span><br /> of visits begin with this sequence of pages
+              </div>
+              <div id="sb1"></div>
+              <div id="sidebar" class="flex_grow">
+                <input type="checkbox" id="togglelegend" autocomplete="off"> Legend<br />
+                <div id="sb1_map" style="visibility: visible" class="map"></div>
+                <div id="legend" style="visibility: hidden;"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="chart2" class="item align_centre flex_column">
+        <div id="sc1_dropdown">
+
+        </div>
+        <div id="sc1" class="align_centre">
+
+        </div>
+      </div>
+    </div>
+
+
+    <div class='column'>
+      <div id="chart3" class='item'>
+        <div id="lnc1" class="align_centre">
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!--  import views js -->
+  <script type="text/javascript" src="./assets/js/lib/views/sequences_sunburst/sequences.js"></script>
+  <script type="text/javascript" src="./assets/js/lib/views/uk_map/map_v001.js"></script>
+  <script type="text/javascript" src="./assets/js/lib/views/scatter_plot/scatter_v002.js"></script>
+  <script type="text/javascript" src="./assets/js/lib/views/scatter_plot/scatter_dropdown.js"></script>
+  <script type="text/javascript" src="./assets/js/lib/views/linkedNodes/linkedNodes.js"></script>
+  <script type="text/javascript" src="./assets/js/topojson.v1.min.js"></script>
+
+
+
+  <script type="text/javascript">
+    "use strict"
+
+    var dm1 = modelConstructor()
+      .addBasicTopicArrayData(false); //Create datamodel object (gives access to methods in ref14model.js etc )
+    var dataModel; //shorthand for dm1.model() and declared as nasty outer block variable for easy access from console.
+    var sb1; //Sunburst 1
+    var map1; //UK Map1
+    var sc1;
+    var lnc1; //Linked Node Chart
+    var countries;
+
+
+    //=============== READ DATA FILES ================================
+    d3.queue()
+      .defer(d3.csv, "data/topics/REF2014T30TopicOrder.csv")
+      .defer(d3.csv, "data/290183_REF_Contextual_table_1314_0.csv")
+      .defer(d3.csv, "data/learning-providers-plus.csv")
+      .defer(d3.json, "data/topics/REF2014T30Python.json")
+      .defer(d3.csv, "data/REF2014_Results.csv")
+      .defer(d3.json, "maps/uk.json")
+      .await(initialiseApp)
+
+    //======================== MAIN FUNCTION =================================
+    //Carries out all initialization and setup
+    function initialiseApp(error, ref14data, ref14context, learningProviders, jsonTopicData, REFcsvData, uk) {
+      //Check data files have loaded
+      if (error) {
+        console.log(" there are errror with loading the data: ", error);
+        return;
+      }
+
+      //Create data model
+      dm1.loadData(ref14data, ref14context, learningProviders, jsonTopicData, REFcsvData);
+      dataModel = dm1.model()
+
+
+      //Draw the basic map
+      countries = topojson.feature(uk, uk.objects.subunits).features;
+      //Group REF entries by town
+      var townGroups = d3.nest().key(e => e.lp.TOWN).entries(dataModel.refEntries);
+      map1 = map("#sb1_map");
+      map1
+        .loadAndRenderMap(countries)
+        .overrideTownNameAccessor(d => firstCaps(d.key));
+      map1.loadAndRenderTowns(townGroups);
+
+
+      //Layout and render flat data as sunburst
+      var nest = d3.nest()
+        .key(refEntry => refEntry.context.regionProvider)
+        .sortKeys(d3.ascending) //sort a-z
+        .key(refEntry => refEntry.lp.TOWN)
+        .sortKeys(d3.ascending)
+        .key(refEntry => refEntry["Institution name"])
+        .sortKeys(d3.ascending)
+        .rollup(values => values) //add rollup to campact leaves and store refEntry info
+        .entries(dataModel.refEntries);
+      //Load data into sunburst with rootnode
+      sb1 = sunburst("#sb1")
+        .loadAndRenderNestDataset(nest, "REF2014")
+
+
+      //Get list of Universities to initialise
+      //other graphs.
+      var universities = d3.nest()
+        .key(function(d) {
+          return d["Institution name"];
+        })
+        .sortKeys(d3.ascending)
+        .entries(dataModel.refEntries);
+      //Mimic document object
+      universities = universities.map(e => {
+        return {
+          data: {
+            key: e.key,
+            values: e.values
+          }
+        };
+      });
+
+
+      //Create scatterplot
+      sc1 = scatterplot("#sc1")
+        .overridesepalWidthFunction(function(e) {
+          return Number(e.environment["4*"])
+        }) //Use the 4* assessment as the bar size
+        .overridesepalLengthFunction(function(e) {
+          return Number(e.environment["WordCount"])
+        })
+        //Useful for updating current uni's UoA with new uni
+        .overrideKeyFunction(e => e["UoAString with Multiple submission letter appended"])
+        .overrideTooltipFunction(e => {
+          return e["Institution name"] + ", " + e["UoAString with Multiple submission letter appended"] + ", 4* = " + e.environment["4*"];
+        });
+      //render scatter with first university's data
+      renderUniversityData(universities[0])
+
+      //Add scatter drop-down
+      var dataSelect = d3.select('#sc1_dropdown')
+        .append('select')
+        .attr('id', 'sc1SelectID')
+        .on('change', onSCDataChange)
+
+      renderSCDataOptions(dataSelect); //Add choice options
+
+
+      //Initialuse linked node chart
+      lnc1 = linkedNodesChart("#lnc1");
+      //render nodes with first university's first UoA data
+      addAssessmentTop3Weights(universities[0].data.values[0]);
+
+
+      //Print main dataModel object to Console
+      console.log("\nFor ease of inspection: dataModel = ", dataModel)
+
+
+      function firstCaps(name) {
+        return name[0] + name.slice(1).toLowerCase()
+      };
+    }
+
+
+    //========= DATA FUNCTIONS ===========//
+
+    function renderUniversityData(d) {
+      //console.log(d);
+      let university = d.data.key;
+      //Generate set of REF entries for this university
+      var sc1Data = dataModel.refEntries
+        .filter(e => e["Institution name"] == university)
+        .sort(function(a, b) {
+          return a["UoAString with Multiple submission letter appended"] > b["UoAString with Multiple submission letter appended"]
+        })
+      //Render the barchart
+      sc1.loadAndRenderDataset(sc1Data);
+      //console.log("SC1 = ", sc1Data);
+    }
+
+    function addAssessmentTop3Weights(document) {
+      //console.log(document);
+      lnc1.loadAndRenderDataset(document);
+    }
+
+
+    //========= INTERACTION FUNCTIONS ===========//
+
+    function opacityClassKey(keys) {
+      for (let i = 0; i < keys.length; i++) {
+        d3.selectAll(".sbNodesGroup > path").each(function(d) {
+          if (!d3.select(this).classed(keys[i]))
+            d3.select(this).style("opacity", 0.3);
+          else {
+            let institution = d3.select(this).data()[0].data
+            let town = institution.value[0].lp.TOWN;
+            d3.select(".key--" + town.toLowerCase()).classed("highlight", true).selectAll("circle").attr("r", 2.5);
+          }
+        });
+      }
+    }
+
+    function highlightClassKey(keys) {
+      for (let i = 0; i < keys.length; i++) {
+        d3.selectAll("." + keys[i]).classed("highlight", true);
+      }
+    }
+
+    function unhighlightClassKey(keys) {
+      for (let i = 0; i < keys.length; i++) {
+        d3.selectAll("." + keys[i]).classed("highlight", false);
+      }
+    }
+
+    function getKeyClasses(d) {
+      let classes = d.attr("class").split(" ");
+      let keys = [];
+
+      for (let i = 0; i < classes.length; i++) {
+        if (classes[i].startsWith("key--"))
+          keys.push(classes[i]);
+      }
+      return keys;
+    }
+
+    function highlightUniversities(subject) {
+      var allUnisWithSubject = dataModel.refEntries
+        .filter(e => e["UoAString"] == subject).map(e => [e["Institution name"], e.lp.TOWN]);
+      // Fade all the segments.
+      d3.selectAll("g.sbNodesGroup path, g.mapGroup path").style("opacity", 0.3);
+
+      for (var i = 0; i < allUnisWithSubject.length; i++) {
+        var sbKey = ".key--" + (allUnisWithSubject[i][0]).replace(/[\W]+/g, "_");
+        var mapKey = ".key--" + (allUnisWithSubject[i][1]).replace(/[\W]+/g, "_").toLowerCase();
+
+        d3.select(sbKey).style("opacity", 1);
+        d3.select(mapKey).classed("highlight", true).selectAll("circle").attr("r", 2.5);
+      }
+    }
+
+    function resetAllhighlights() {
+      resetTowns();
+      resetSunburst();
+      resetScatter();
+      resetLinkedNode();}
+
+    function resetLinkedNode() {
+      d3.selectAll("g.nodeGroup > g.node > circle").classed("highlight", false);
+    }
+
+    function resetScatter() {
+      d3.selectAll("svg.scatterplot > circle").classed("highlight", false);
+    }
+
+    function resetSunburst() {
+      d3.selectAll("g.sbNodesGroup path, g.mapGroup path").style("opacity", 1);
+    }
+
+    function resetTowns() {
+      d3.selectAll("g.classTown")
+        .classed("highlight", false)
+        .each(function(d, i) {
+          var children = d3.selectAll(this.childNodes);
+          children.attr("r", 1.5);
+        });
+    }
+  </script>
+
+</body>
+
+</html>

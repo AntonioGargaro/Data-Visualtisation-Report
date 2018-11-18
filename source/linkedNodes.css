@@ -1,0 +1,17 @@
+circle {
+  stroke-width: 1.5px;
+}
+line {
+  stroke: #999;
+}
+
+g.node > circle {
+  stroke: #a9a9a9;
+  fill: lightgrey;
+}
+
+g.node > circle.highlight {
+  stroke: black;
+  fill: yellow;
+  stroke-width: 2;
+}
