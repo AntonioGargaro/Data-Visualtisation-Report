@@ -7,7 +7,7 @@
    https://bl.ocks.org/BTKY/6c282b65246f8f46bb55aadc322db709
 
    What it does:
-  	addNodess a bar chart and its axes using the GUP
+  	add nodes to chart
 
    Dependencies
   	D3.js v4
@@ -71,7 +71,7 @@ function linkedNodesChart(targetDOMelement) {
     //The key function is used to obtain keys for GUP rendering and
     //to provide the categories for the y-axis
     //These valuse should be unique
-    GUPkeyField = yAxisCategoryFunction = keyFunction;
+    GUPkeyField = keyFunction;
     return chordObject;
   };
 
@@ -103,11 +103,6 @@ function linkedNodesChart(targetDOMelement) {
     return chordObject;
   };
 
-  chordObject.yAxisIndent = function(indent) {
-    yAxisIndent = indent;
-    return chordObject;
-  };
-
   //=================== PRIVATE VARIABLES ====================================
   //Width and height of svg canvas
   //Declare and append SVG element
@@ -129,8 +124,6 @@ function linkedNodesChart(targetDOMelement) {
   var rScale = d3.scaleSqrt().range([5, 20]);
 
   var totalWeightOfRootNodes = 0;
-
-  //var fill = d3.scaleOrdinal(d3.schemeCategory20);
 
   var simulation = d3
     .forceSimulation()
@@ -456,7 +449,6 @@ function linkedNodesChart(targetDOMelement) {
 
   function updateWeights(node) {
     let weight = node.weight;
-
     let cur_node = node;
 
     while (cur_node.parentNode != null) {
@@ -485,15 +477,12 @@ function linkedNodesChart(targetDOMelement) {
       });
     }
 
-    //console.log(links);
     links = links.filter(function(d) {
       return d.source != parNode && d.target != node;
     });
-    //console.log(links);
 
-    for (let j = 0; j < childNodes.length; j++) {
+    for (let j = 0; j < childNodes.length; j++)
       removeNodeAndChildren(childNodes[j]);
-    }
 
     d3.select("#" + nodeGUPkey_d(node))
       .transition()

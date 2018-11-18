@@ -30,13 +30,6 @@ function scatterplot(targetDOMelement) {
 
   //=================== PUBLIC FUNCTIONS =========================
   //
-  scatterplotObject.appendedMouseOverFunction = function(callbackFunction) {
-    console.log("appendedMouseOverFunction called", callbackFunction);
-    appendedMouseOverFunction = callbackFunction;
-    render();
-    return scatterplotObject;
-  };
-
   scatterplotObject.appendedMouseOutFunction = function(callbackFunction) {
     appendedMouseOutFunction = callbackFunction;
     render();
@@ -90,21 +83,8 @@ function scatterplot(targetDOMelement) {
     return scatterplotObject;
   };
 
-  scatterplotObject.maxValueOfDataField = function(max) {
-    maxValueOfDataset = max;
-    maxValueOfDataField = function() {
-      return maxValueOfDataset;
-    };
-    return scatterplotObject;
-  };
-
   scatterplotObject.render = function() {
     render(); //Needed to update DOM
-    return scatterplotObject;
-  };
-
-  scatterplotObject.yAxisIndent = function(indent) {
-    yAxisIndent = indent;
     return scatterplotObject;
   };
 
@@ -130,7 +110,6 @@ function scatterplot(targetDOMelement) {
   //For manual setting of bar length scaling
   //(only used if .maxValueOfDataset() public method called)
   var maxValueOfDataset;
-
   var uniName = "";
 
   //=================== INITIALISATION CODE ====================================
@@ -218,10 +197,6 @@ function scatterplot(targetDOMelement) {
     return d3.max(dataset, sepalLength);
   };
 
-  var appendedMouseOutFunction = function() {};
-
-  var appendedMouseOverFunction = function() {};
-
   var mouseOverFunction = function(d, i) {
     d3.select(this)
       .classed("highlight", true)
@@ -236,7 +211,6 @@ function scatterplot(targetDOMelement) {
     d3.select(this)
       .classed("highlight", false)
       .classed("noHighlight", true);
-    appendedMouseOutFunction(d, i);
 
     let classes = getKeyClasses(d3.select(this));
     unhighlightClassKey(classes);
@@ -245,7 +219,7 @@ function scatterplot(targetDOMelement) {
     resetTowns();
   };
 
-  var mouseclick = function(d, i) {
+  var clickFunction = function(d, i) {
     addAssessmentTop3Weights(d);
   };
 
@@ -258,18 +232,13 @@ function scatterplot(targetDOMelement) {
     if (circle.classed("selected")) uoaSelect[uoaSelect.length] = d;
     else {
       let index = uoaSelect.indexOf(d);
-      console.log(index);
-      if (index > -1) {
-        uoaSelect.splice(index, 1);
-      }
+      if (index > -1) uoaSelect.splice(index, 1);
     }
-    console.log(uoaSelect);
-    console.log(d);
   };
 
   var toggleMouseActions = function(d) {
     if (d.on("click") == null) {
-      d.on("click", mouseclick)
+      d.on("click", clickFunction)
         .on("mouseover", mouseOverFunction)
         .on("mouseout", mouseOutFunction)
         .classed("selected", false);
@@ -297,7 +266,6 @@ function scatterplot(targetDOMelement) {
         }
         return match;
       });
-      //GUPkeyField = d => d["DocumentID"];
     }
 
     for (let i = 0; i < uoaSelect.length; i++) {
@@ -393,7 +361,7 @@ function scatterplot(targetDOMelement) {
       .on("mouseover", mouseOverFunction)
       .on("mouseout", mouseOutFunction)
       .on("contextmenu", rightClickFunction)
-      .on("click", mouseclick)
+      .on("click", clickFunction)
       .classed("highlight", d => d.highlight)
       .classed("enterSelection circle", true);
 

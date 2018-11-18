@@ -57,11 +57,6 @@ function sunburst(targetDOMelement) {
     return sunburstObject; //for method chaining
   };
 
-  sunburstObject.overrideClickFunction = function(mouseclickFunction) {
-    clickFunction = mouseclickFunction;
-    return sunburstObject; //for method chaining
-  };
-
   //=================== PRIVATE VARIABLES ====================================
   //Declare and append SVG element
   var margin = {
@@ -222,9 +217,7 @@ function sunburst(targetDOMelement) {
         .transition()
         .duration(1000)
         .attrTween("d", arcTweenZoom(d));
-    } else {
-      renderUniversityData(d);
-    }
+    } else renderUniversityData(d);
   };
 
   // Scales the bread based on key length
@@ -297,7 +290,7 @@ function sunburst(targetDOMelement) {
       .style("fill", color)
       .style("stroke", "#A9A9A9")
       .style("opacity", 1)
-      .on("mouseover", mouseover)
+      .on("mouseover", mouseoverFunction)
       .on("click", clickFunction);
 
     // Add the mouseleave handler to the bounding circle.
@@ -318,7 +311,7 @@ function sunburst(targetDOMelement) {
   }
 
   // Fade all but the current sequence, and show it in the breadcrumb trail.
-  function mouseover(d) {
+  function mouseoverFunction(d) {
     // Change cursor type to pointer
     d3.select(this).style("cursor", "pointer");
 
@@ -331,9 +324,7 @@ function sunburst(targetDOMelement) {
     var percentage = ((100 * d.value) / totalSize).toPrecision(3),
       percentageString = percentage + "%";
 
-    if (percentage < 0.1) {
-      percentageString = "< 0.1%";
-    }
+    if (percentage < 0.1) percentageString = "< 0.1%";
 
     d3.select("#percentage").text(percentageString);
     d3.select("#explanation").style("visibility", "");
