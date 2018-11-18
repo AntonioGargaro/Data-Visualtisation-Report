@@ -1,0 +1,275 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage{comment} % enables the use of multi-line comments (\ifx \fi) 
+\usepackage{lipsum} %This package just generates Lorem Ipsum filler text. 
+\usepackage{fullpage} % changes the margin
+\usepackage{graphicx}
+\usepackage{cellspace}
+\setlength\cellspacetoplimit{4pt}
+\setlength\cellspacebottomlimit{4pt}
+
+\usepackage{titlesec}
+\setcounter{secnumdepth}{4}
+
+\newcommand\cincludegraphics[2][]{\raisebox{-0.3\height}{\includegraphics[#1]{#2}}}
+
+
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\renewcommand{\baselinestretch}{1.25}
+
+\begin{document}
+%Header-Make sure you update this information!!!!
+\noindent
+\large\textbf{Data Visualisation Report} \hfill \textbf{Antonio Gargaro} \\
+\normalsize F21DV \\
+Prof. Mike Chantler  \hfill Due Date: 19/11/18  \\
+
+\tableofcontents
+\newpage
+
+\section{Executive Summary}
+% MAX 1 PAGE
+% This section concisely describes goals for the project and major findings and lessons learnt
+The development of a dashboard to display concise topic model data intuitively to represent rankings against word count for `Unit of Assessments', geographical focus of these units, and the weighting of the top three word collections per unit. Originally, the data provided was separate and would require users a lot of time to research and gather each document. Analysis of each document is another encumbering task in of itself. Displaying relations clearly between this data is the aim of this project.
+
+Utilising `d3.js' and the examples provided by Mike Chantler, Mike Bostock and other `blo.cks.org' authors allows for a clear resolution towards representing this data. Specifically, licensed code was modified within the bounds of the specified license, where each source file has descriptor headings for this. Most source files are based off of Mike Chantler's work. The need to quickly filter through nested data of institutions requires the power of d3 and JavaScript to carry out data manipulation and graph these data points meaningfully in a web browser.
+
+I find that this is possible by following the `General Update Pattern' described by Chantler and Bostock. This allows for the reuse and addition of data with efficiency to ensure an optimal experience. There is many methods provided by the d3 library to display this data in intuitive and clear ways. I ultimately decided on a sunburst for navigation, a scatter plot for comparisons and a force-directed graph for relations and comparisons.
+
+Ultimately, d3 provides a large set of tools to complete this project. This is apparent with the ability to modify all aspects of chart generation, the ability to select specific elements already displayed and modify them, as well as the possibility of moving objects across the screen to provide an interactive experience.
+
+\newpage
+\section{Interface Design: Rationale \& Critical Review}
+
+A large sunburst displaying all institutions allows for quick access to any specific one. A `breadcrumb' trail allows the user to keep track of where they are in this hierarchy, a legend gives a quick reference about which region matches to what colour, and an interactive map displaying what town is represented by each slice. This displays a clear navigational hierarchy for the DoR user to select specific regions, towns or institutions, while understanding what area of the UK he is searching in. 
+
+A scatter plot graph represents all document topics one of the selected institutions contains. The `4* Rating' is plotted against the word count for each document. This allows the DoR to easily identify which documents have a high ranking and how it correlates with the word count. The easy visualisation of the plotted points displays each documents ranking very clearly. The comparison of two topics can be easily distinguished from this graph by sorting between `Environment' and `Outputs' data, aiding a DoR user.
+
+Finally, a force-directed layout (Linked nodes) represents the analysis of a selected topic by representing the top three word combinations in a tree-like structure. The benefits of this structure allow for multiple topics to be appended onto the same institution's root node. This allows the building of a `map' to compare each weighting of the topics weights. Furthermore, the addition of more than one institution can be used as to compare the topic weights of each institution's weighting. All weightings displayed are relative to the current root node it is in. For example, if you added three different topics, the root node would add up to 100 percent. This allows for analysis of topic weightings relative to other topics by the same university.
+
+
+\section{Interface Design: Layouts \& Interactivity}
+\subsection{List of Layouts}
+%This should use a table to list the layouts (one row per layout). The first column will contain small images of the layouts, the second column will contain short descriptions of the data used, while the third will describe how any changes to the displayed data are indicated to the user (e.g. use of transitions etc.).
+
+\begin{center}
+ \begin{tabular}{||c|p{0.3\linewidth}|p{0.3\linewidth}||} 
+ \hline
+ Layout Image & Data Description & Changes \\ [0.5ex] 
+ \hline\hline
+ \raisebox{-\totalheight}{\includegraphics[width=0.3\textwidth]{imgs/Layout_SB.PNG}} 
+ & This layout uses the `d3 nest' functionality with the first depth keyed to regions, the second depth keyed to towns and the third depth keyed to institutions. The `bread crumbs' and toggable legend use this data. The smaller UK map layout takes in a data set for towns \textbf{only}.
+ & No data explicitly changes on the sunburst, however, selecting a town or region zooms it towards the root node and only its descendants are displayed as slices. The `bread crumb' trail has no transitions as to be responsive to mouse overs.
+ \\ 
+ \hline
+ \raisebox{-\totalheight}{\includegraphics[width=0.3\textwidth]{imgs/Layout_SC.PNG}} 
+ & This layout passes in all documents associated with a institution. This plots each point by the unique `UoAString with appended submission letters'. 
+ & Topics that exist in the new selected institution change from cyan to green and move to their new location. Removed topics turn grey with half opacity and move to the bottom right corner and disappear. New topics move in from the top left corner. 
+ \\
+ \hline
+ \raisebox{-\totalheight}{\includegraphics[width=0.3\textwidth]{imgs/Layout_NL.PNG}} 
+ & This layout appends documents and refactors them into nodes with my custom addNode function. This is necessary due to how this type of graph works. It must be able to generate links between these nodes and understand their links in a flat data set. 
+ & The addition of nodes move in from the top left corner and join onto existing root nodes, or make their own ones. Removal of any node fades the node and all its children out. 
+ \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+\newpage
+\subsection{Interaction between Layouts}
+%This section will use images, arrows and short textual descriptions to describe the interactions between charts. Short narratives describing the rationale for these interactions should be provided.
+\subsubsection{Sunburst Contained Interaction}
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/sb_int/Region_select.png} \\
+	\caption{Sunburst Map Highlight and Bread Crumb Trail: 
+	\textit{(a)} Mouse over region highlights all towns in region on the map
+	\textit{(b)} Mouse over anything displays hierarchy bread crumb trail}
+	\label{fig:sb_con:reg_bread}
+          \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:sb_con:reg_bread}.a shows all towns within that region highlighted on the UK map, to represent their locations in a familiar map form. This can be used by the DoR to quickly identify where in the UK they are navigating through.
+
+\noindent Figure \ref{fig:sb_con:reg_bread}.b shows the start of a bread crumb trail that shows the path through the descendants of the hierarchy navigation. This allows the DoR to keep track of the route he is currently navigating through.
+\\
+
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.5\textwidth]{imgs/sb_int/Legend_Toggle_Bread.png} \\
+	\caption{Sunburst Legend Toggle: 
+	\textit{(a)} Toggle checkbox to swap map with colour legend
+	\textit{(b)} Mouse over anything displays hierarchy bread crumb trail}
+    \label{fig:sb_con:legend_toggle_bread}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:sb_con:legend_toggle_bread}.a swaps the UK map out with a legend. This allows the DoR to also identify which region belongs to what colour. An important point is that each descendant of a region corresponds with a darker colour from the region.
+
+\noindent Figure \ref{fig:sb_con:legend_toggle_bread}.b is similar to figure \ref{fig:sb_con:reg_bread}.b. See example above.
+
+
+\\
+
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/sb_int/zoomable_sb.png} \\
+	\caption{Sunburst Zoomable: 
+	\textit{(a)} Left-click on any region or town to place it as root node}
+    \label{fig:sb_con:zoomable_sb}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:sb_con:zoomable_sb}.a zooms the sunburst by selecting a region or town. This allows the DoR to filter the sunburst and focus on institutions in specific geographical areas. The UK map will only show specific towns in that region when mousing over the sunburst.
+
+\newpage
+\subsubsection{Scatter Plot Contained Interaction}
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/sp_int/change_data.png} \\
+	\caption{Scatter Plot Change Data: 
+	\textit{(a)} Swap between Environment and Output}
+    \label{fig:sp_con:swap_data}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:sp_con:swap_data}.a allows the swapping of 4* rating data between environment and output. This allows the DoR to compare against the specific types of rating data, giving insights of the various different types of ratings.
+
+
+\subsubsection{Linked Nodes Contained Interaction}
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/ln_int/topic_weight_highlight.png} \\
+	\caption{Linked Node Highlights: 
+	\textit{(a)} Highlight common word combinations between topics}
+    \label{fig:lp_con:common_topic_words}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:lp_con:common_topic_words}.a highlights word collections between all the topics. This is useful for the DoR as he may analyse a unit of assessment from multiple institutions, like the example above. This allows these topic words and weightings to be easily identifiable, allowing comparison of relative and actual topic weightings. This can be used with multiple institutions.
+
+\\
+
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/ln_int/remove_nodes.png} \\
+	\caption{Linked Node Highlights: 
+	\textit{(a)} Removal of unit and child nodes while institution remains.
+	\textit{(b} Removal of all nodes.}
+    \label{fig:lp_con:remove_nodes}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:lp_con:remove_nodes}.a shows the right-click interaction to remove a unit node and all children from the linked node graph. Figure \ref{fig:lp_con:remove_nodes}.b shows the removal of an institution node. This is helpful for a DoR after no longer requiring a certain topic or institution.
+
+
+\subsubsection{Scatter Plot to Sunburst Interaction}
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/sc_sb_int/select_UoA_and_compare.png} \\
+	\caption{Scatter Plot Selection \& Comparison: 
+	\textit{(a)} Right-click on a unit of assessment highlights it is selected.}
+    \label{fig:sc_sb_int:uoa_select}
+    \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+
+\noindent Figure \ref{fig:sc_sb_int:uoa_select}.a requires a right-click to highlight a point in magenta and disables all other interactions with that point. This also freezes the sunburst to display what institutions have the selected unit of assessment. Now selecting an institution from the sunburst will only pull the selected topics data onto the scatter plot to allow for easy comparison. After performing this action will reset the unit selection. This is useful for the DoR to allow for quick reference to what institutions have a document for the selected unit. This can provide clear comparisons of their 4* ratings.
+
+
+\subsubsection{Linked Node to Sunburst Interaction}
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.6\textwidth]{imgs/sb_ln_int/LN_SB_Institute_map_highlight.png} \\
+	\caption{Linked Node Highlights Institution: 
+	\textit{(a)} Highlight institution on sunburst and town on the map.}
+    \label{fig:ln_sb_int:institution_town_highlight}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:ln_sb_int:institution_town_highlight}.a highlights the current moused over institution on the sunburst, and highlights its location on the map. This is useful for the DoR to easily identify where on the sunburst the institution is positioned, while also feeding back its geographical location.
+
+
+\subsubsection{Sunburst, Scatter Plot and Linked Node Interactions}
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.42\textwidth]{imgs/sb_sc_ln_int/3_way_topic_highlight.png} \\
+	\caption{Unit of Assessment Highlights: 
+	\textit{(a)} Mouse over on Linked Node unit highlights same unit on scatter plot and every institution that contains that unit on the sunburst.
+	\textit{(b)} Same as \ref{fig:sb_sc_ln_int:3_way_topic_highlight}.a but mouse over on scatter plot point highlights same unit on linked node.}
+    \label{fig:sb_sc_ln_int:3_way_topic_highlight}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:sb_sc_ln_int:3_way_topic_highlight}.a and \ref{fig:sb_sc_ln_int:3_way_topic_highlight}.b highlights where this unit of assessment is present on the scatter plot or the linked node respectively. Mousing over a unit on either graph displays what institution this unit is present in on the sunburst. This is useful for the DoR as it shows quickly what institution has a document based on that unit. It also allows to quick display where each document is on the scatter plot and linked node graph. This can especially be useful, for example, to quickly locate where the the current unit moused over on the linked node graph is on the scatter plot graph. Similarly, this can check if the unit moused over on the scatter plot is currently present in the linked node graph. 
+
+\\
+
+\begin{figure}[hbt!]
+	\centering
+      \includegraphics[width=0.5\textwidth]{imgs/sb_sc_ln_int/topics_in_current_and_in_highlighted.png} \\
+	\caption{All Unit of Assessment Highlights: 
+	\textit{(a)} Mouse over on sunburst institution highlights all the units which are also currently present on the scatter plot and linked node graph.}
+    \label{fig:sb_sc_ln_int:topics_in_cur_mouse}
+     \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\end{figure}
+
+\noindent Figure \ref{fig:sb_sc_ln_int:topics_in_cur_mouse}.a shows that when mousing over an institution on the sunburst, what units that are currently being represented in the scatter plot and linked node graphs are also present in that institution. This is particularly helpful for the DoR as to confirm that another unit they are looking for has the specific unit they are comparing.
+
+
+
+\newpage
+\section{Software Design}
+4.1 Design overview (one page max)
+This should provide a diagram and short associated narrative describing the top-level structure of your design (i.e. how you have split the design up into the various source files and what their runtime equivalents communicate with each other).
+
+4.2 Use of Design Patterns
+This section should briefly describe any software design patterns that you have used.
+
+Each design pattern (together with a critical analysis of what their advantages and disadvantages were for your project) should be described in their own, short, numbered subsection (4.2.1, 4.2.2 … etc.)
+
+% to comment sections out, use the command \ifx and \fi. Use this technique when writing your pre lab. For example, to comment something out I would do:
+%  \ifx
+%	\begin{itemize}
+%		\item item1
+%		\item item2
+%	\end{itemize}	
+%  \fi
+
+\section{Original contribution made by the student}
+5.1 Highlights 
+This section should briefly identify and highlight anything that you feel particularly proud of that you would like to bring to the attention of the examiners. 
+5.2 File by File description
+A subsection should be provided for each of your application’s software source files (e.g. 5.2.1, 5.2.2, etc,). 
+The subsections should have the same name as the source files.
+They should start with a table indicating the percentage contributions of the sources, and if applicable, the source of the code and its licence as shown in the example below:
+
+
+
+This should be followed by a short description of the student’s contribution to the module (source file). If the student’s contribution to a particular source file is 0\% then,  no narrative is required.
+
+
+\section*{Source code listings}
+Listings (printouts) must be included for all source files that contain code written by the student.
+Each listing should:
+Start on a new page, be contained within its own numbered subsection, and have the same title as the associated source code file
+Have an appropriate ‘header’ as a comment at the start of the file (containing such information as: authors, modification history, and the module’s purpose or function)
+Each line should be numbered (starting at 1.) Failure to number the lines will put you at a disadvantage in the exam.
+
+These listings must 
+Be readable by Turnitin, and
+Be included within the .pdf file containing the report.
+
+
+%Make sure to change these
+Lab Notes, HelloWorld.ic, FooBar.ic
+%\fi %comment me out
+
+\begin{thebibliography}{9}
+\bibitem{Robotics} Fred G. Martin \emph{Robotics Explorations: A Hands-On Introduction to Engineering}. New Jersey: Prentice Hall.
+\bibitem{Flueck}  Flueck, Alexander J. 2005. \emph{ECE 100}[online]. Chicago: Illinois Institute of Technology, Electrical and Computer Engineering Department, 2005 [cited 30
+August 2005]. Available from World Wide Web: (http://www.ece.iit.edu/~flueck/ece100).
+\end{thebibliography}
+
+\end{document}
