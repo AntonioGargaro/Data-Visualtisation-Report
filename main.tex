@@ -268,6 +268,13 @@ Finally, a force-directed layout (Linked nodes) displays the selected topic by r
 \newpage
 \subsection{Use of Design Patterns}
 % This section should briefly describe any software design patterns that you have used. Each design pattern (together with a critical analysis of what their advantages and disadvantages were for your project) should be described in their own, short, numbered subsection (4.2.1, 4.2.2 … etc.)
+
+\subsubsection{General Update Pattern}
+The bases of this course was based on the General Update Pattern (GUP). This design principle was used consciously throughout my project. This allowed for easy manipulation of new data \textit{entering} a chart, assigning all elements their specific attributes and callback functions. The \textit{update} selections was used to carry out setting specific attributes towards elements which were staying on the svg. The final \textit{exiting} elements would be removed from a chart but by selecting this group allows transitions to perform smooth exits across the svg, or setting specific attributes such as making an element grey. This design pattern is simple yet effective and is apparent in all of Bostock's work.
+
+\subsection{Layout Generators}
+These variables would construct the basic shapes of each chart and plot smaller shapes, such as arcs, together to create a large shape, like a sunburst. This is used in my sunburst to shape each arc based on the data created by d3's partition function. This function creates node's with unique attributes which are interpreted by the arc layout generator. My sunburst zoom function was implemented by modifying the arc generator, so that the `zoomed' selection would be enlarged while the filter slices would shrink to nothing. 
+
 \subsubsection{Function Class}
 A prevalent software design pattern for this project was a function class. This is essentially a function imitating a class definition. This has its advantages such as providing information hiding techniques and assigning variables locally for that class. This means variables cannot accidentally be modified else where in this project. Another benefit of this allows for overrides of specific functions of variables when explicitly stated. For example, updating an accessor function when changing data on my scatter plot chart (See figure \ref{fig:sc_sb_int:uoa_select}). This also allowed for function chaining by continually returning an object from each public method.
 
@@ -281,7 +288,7 @@ This project has numerous amounts of function callbacks to handle functionality 
 
 
 
-
+\newpage
 \section{Original contribution made by the student}
 \subsection{Highlights} 
 % This section should briefly identify and highlight anything that you feel particularly proud of that you would like to bring to the attention of the examiners. 

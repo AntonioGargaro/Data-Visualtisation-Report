@@ -284,10 +284,9 @@ function linkedNodesChart(targetDOMelement) {
 
   function updateScalesandRender(rootNode) {
     let sum = 0;
-
-    for (let i = 0; i < dataset.length; i++) {
+    for (let i = 0; i < dataset.length; i++)
       if (dataset[i].parentNode == null) sum += dataset[i].weight;
-    }
+
     totalWeightOfRootNodes = sum;
     scaleWeights = scaleWeights.domain([0, totalWeightOfRootNodes]);
   }
@@ -315,7 +314,12 @@ function linkedNodesChart(targetDOMelement) {
     var node = nodeGroup.selectAll(".node").data(dataset, nodeGUPkey_d);
 
     // Remove nodes no longer used
-    node.exit().remove();
+    node
+      .exit()
+      .transition()
+      .duration(1000)
+      .style("opacity", 0)
+      .remove();
 
     // Apply to new nodes
     var nodeEnterSel = node
@@ -484,13 +488,7 @@ function linkedNodesChart(targetDOMelement) {
     for (let j = 0; j < childNodes.length; j++)
       removeNodeAndChildren(childNodes[j]);
 
-    d3.select("#" + nodeGUPkey_d(node))
-      .transition()
-      .duration(1000)
-      .style("opacity", 0)
-      .on("end", function() {
-        GUP_bars();
-      });
+    GUP_bars();
   }
 
   function dragstarted(d) {
