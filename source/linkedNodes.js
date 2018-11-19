@@ -313,13 +313,21 @@ function linkedNodesChart(targetDOMelement) {
     // Apply the general update pattern to the nodes.
     var node = nodeGroup.selectAll(".node").data(dataset, nodeGUPkey_d);
 
-    // Remove nodes no longer used
-    node
-      .exit()
+    // Get Node Exit selection
+    var nodeExitSel = node.exit();
+    // Shrink circles
+    nodeExitSel
+      .selectAll("circle")
+      .transition()
+      .duration(1000)
+      .attr("r", 0);
+    // and fade circles and labels
+    nodeExitSel
       .transition()
       .duration(1000)
       .style("opacity", 0)
       .remove();
+
 
     // Apply to new nodes
     var nodeEnterSel = node
@@ -356,7 +364,7 @@ function linkedNodesChart(targetDOMelement) {
       return d.name + ", actual weight = " + (d.weight * 100).toFixed(2) + "%";
     });
 
-    var updateNode = node.selectAll("g.node > circle").attr("r", function(d) {
+    var updateNode = node.selectAll("g.node > circle").transition().duration(1000).attr("r", function(d) {
       return rScale(weightAccessor(d));
     });
 

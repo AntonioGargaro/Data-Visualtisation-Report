@@ -72,7 +72,7 @@ Finally, a force-directed layout (Linked nodes) displays the selected topic by r
  \hline
  \raisebox{-\totalheight}{\includegraphics[width=0.3\textwidth]{imgs/Layout_NL.PNG}} 
  & This layout appends documents and refactors them into nodes with my custom addNode function. This is necessary due to how this type of graph works. It must be able to generate links between these nodes and understand their links in a flat data set. 
- & The addition of nodes move in from the top left corner and join onto existing root nodes, or make their own ones. Removal of any node fades the node and all its children out. 
+ & The addition of nodes move in from the top left corner and join onto existing root nodes, or make their own ones. All nodes `grow' with their new weight being added. Removal of any node causes it to shrink and fade, as well as all its children. 
  \\ [1ex] 
  \hline
 \end{tabular}
@@ -155,13 +155,12 @@ Finally, a force-directed layout (Linked nodes) displays the selected topic by r
 	\centering
       \includegraphics[width=0.6\textwidth]{imgs/ln_int/remove_nodes.png} \\
 	\caption{Linked Node Fade: 
-	\textit{(a)} Removal of unit and child nodes while institution remains.
-	\textit{(b} Removal of all nodes.}
+	\textit{(a)} Removal of all nodes.}
     \label{fig:lp_con:remove_nodes}
      \noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
 \end{figure}
 
-\noindent Figure \ref{fig:lp_con:remove_nodes}.a shows the right-click interaction to remove a unit node and all children from the linked node graph, which the institution node remains. Figure \ref{fig:lp_con:remove_nodes}.b shows the removal of an institution node. This is helpful for a DoR after no longer requiring a certain word collection, topic or institution.
+\noindent Figure \ref{fig:lp_con:remove_nodes}.a shows the removal of all nodes by right clicking the institution node. Other nodes may be removed singularly as \textbf{only} there children are removed. The nodes shrink and fade, performing transitions to complete this.  This is helpful for a DoR after no longer requiring a certain word collection, topic or institution.
 
 \subsubsection{Sunburst to Scatter Plot Interaction}
 
@@ -272,8 +271,14 @@ Finally, a force-directed layout (Linked nodes) displays the selected topic by r
 \subsubsection{General Update Pattern}
 The bases of this course was based on the General Update Pattern (GUP). This design principle was used consciously throughout my project. This allowed for easy manipulation of new data \textit{entering} a chart, assigning all elements their specific attributes and callback functions. The \textit{update} selections was used to carry out setting specific attributes towards elements which were staying on the svg. The final \textit{exiting} elements would be removed from a chart but by selecting this group allows transitions to perform smooth exits across the svg, or setting specific attributes such as making an element grey. This design pattern is simple yet effective and is apparent in all of Bostock's work.
 
+
+\subsubsection{Binding Data}
+To utilise the GUP required binding keys to data. This could be any unique data value and was implemented by an accessor function. Normal cases of this would just be a unit, institution, town or region string. A noteable use of the binded key is in the scatter plot implementation. As points are binded with \textit{`UoAstring with appended submission letter'}, newly selected institutions with the same units would only move the existing point, rather than discarding it and creating a new point. However, when selecting a unit to compare with another institution's unit, the accessor function required to be temporarily changed, as to not have two unit strings conflict.
+
+
 \subsubsection{Layout Generators}
 These variables would construct the basic shapes of each chart and plot smaller shapes, such as arcs, together to create a large shape, like a sunburst. This is used in my sunburst to shape each arc based on the data created by d3's partition function. This function creates node's with unique attributes which are interpreted by the arc layout generator. My sunburst zoom function was implemented by modifying the arc generator, so that the `zoomed' selection would be enlarged while the filter slices would shrink to nothing. 
+
 
 \subsubsection{Function Class}
 A prevalent software design pattern for this project was a function class. This is essentially a function imitating a class definition. This has its advantages such as providing information hiding techniques and assigning variables locally for that class. This means variables cannot accidentally be modified else where in this project. Another benefit of this allows for overrides of specific functions of variables when explicitly stated. For example, updating an accessor function when changing data on my scatter plot chart (See figure \ref{fig:sc_sb_int:uoa_select}). This also allowed for function chaining by continually returning an object from each public method.
@@ -395,53 +400,54 @@ I only modified the scaling of the map for this file.
 
 %This should be followed by a short description of the student’s contribution to the module (source file). If the student’s contribution to a particular source file is 0\% then,  no narrative is required.
 
+
 \newpage
 \section*{Source code listings}
 \subsection{index.html}
-\inputminted{html}{source/index.html}
+\inputminted[linenos]{html}{source/index.html}
 
 \newpage
 \subsection{sequences.js}
-\inputminted{js}{source/sequences.js}
+\inputminted[linenos]{js}{source/sequences.js}
 
 \newpage
 \subsection{map\_v001.js}
-\inputminted{js}{source/map_v001.js}
+\inputminted[linenos]{js}{source/map_v001.js}
 
 \newpage
 \subsection{scatter\_v002.js}
-\inputminted{js}{source/scatter_v002.js}
+\inputminted[linenos]{js}{source/scatter_v002.js}
 
 \newpage
 \subsection{scatter\_dropdown.js}
-\inputminted{js}{source/scatter_dropdown.js}
+\inputminted[linenos]{js}{source/scatter_dropdown.js}
 
 \newpage
 \subsection{linkedNodes.js}
-\inputminted{js}{source/linkedNodes.js}
+\inputminted[linenos]{js}{source/linkedNodes.js}
 
 
 \newpage
 \subsection{main.css}
-\inputminted{css}{source/main.css}
+\inputminted[linenos]{css}{source/main.css}
 
 
 \newpage
 \subsection{sequences.css}
-\inputminted{css}{source/sequences.css}
+\inputminted[linenos]{css}{source/sequences.css}
 
 
 \newpage
 \subsection{map\-v001.css}
-\inputminted{css}{source/map-v001.css}
+\inputminted[linenos]{css}{source/map-v001.css}
 
 
 \newpage
 \subsection{scatterplot.css}
-\inputminted{css}{source/scatterplot.css}
+\inputminted[linenos]{css}{source/scatterplot.css}
 
 \newpage
 \subsection{linkedNodes.css}
-\inputminted{css}{source/linkedNodes.css}
+\inputminted[linenos]{css}{source/linkedNodes.css}
 
 \end{document}
